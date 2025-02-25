@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Email</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 style="color:white; text-align: center;">My App</h2>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/bmi"><i class="fas fa-weight-scale"></i> BMI Calculator</a>
+            <a href="/email"><i class="fas fa-envelope"></i> Email Sender</a>
+            <a href="/qr"><i class="fas fa-qrcode"></i> QR Code Generator</a>
+            <a href="/weather"><i class="fas fa-cloud-sun"></i> Weather Info</a>
+            <a href="/crud"><i class="fas fa-pen-to-square"></i> Manage Blog</a>
+        </div>
+        <div>
+            <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 style="text-align: center;">Email Sender</h1>
+        <form id="emailForm">
+            <label>Recipient Email:</label>
+            <input type="email" id="recipient" required>
+            <br>
+            <label>Subject:</label>
+            <input type="text" id="subject" required>
+            <br>
+            <label>Message:</label>
+            <textarea id="message" required></textarea>
+            <br>
+            <label>Attachment (optional):</label>
+            <input type="file" id="attachment">
+            <br>
+            <button type="submit">Send Email</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const recipient = document.getElementById('recipient').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            const attachment = document.getElementById('attachment').files[0];
+
+            const formData = new FormData();
+            formData.append('recipient', recipient);
+            formData.append('subject', subject);
+            formData.append('message', message);
+            if (attachment) formData.append('attachment', attachment);
+
+            try {
+                const response = await fetch('/send-email', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        });
+
+    </script>
+</body>
+</html>

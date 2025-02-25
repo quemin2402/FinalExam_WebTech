@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BMI Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 style="color:white; text-align: center;">My App</h2>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/bmi"><i class="fas fa-weight-scale"></i> BMI Calculator</a>
+            <a href="/email"><i class="fas fa-envelope"></i> Email Sender</a>
+            <a href="/qr"><i class="fas fa-qrcode"></i> QR Code Generator</a>
+            <a href="/weather"><i class="fas fa-cloud-sun"></i> Weather Info</a>
+            <a href="/crud"><i class="fas fa-pen-to-square"></i> Manage Blog</a>
+        </div>
+        <div>
+            <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 style="text-align: center;">BMI Calculator</h1>
+        <form id="bmiForm">
+            <label>Weight (kg):</label>
+            <input type="number" id="weight" required>
+            <br>
+            <label>Height (cm):</label>
+            <input type="number" id="height" required>
+            <br>
+            <button type="submit">Calculate BMI</button>
+        </form>
+    
+        <div id="result" style="text-align: center;"></div>
+    </div>
+
+    <script>
+        document.getElementById('bmiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const weight = document.getElementById('weight').value;
+            const height = document.getElementById('height').value;
+
+            const response = await fetch('/calculate-bmi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ weight, height })
+            });
+
+            const resultDiv = document.getElementById('result');
+
+            if (response.ok) {
+                const data = await response.json();
+
+                let color = '';
+                switch (data.category) {
+                    case 'Underweight':
+                        color = 'blue';
+                        break;
+                    case 'Normal':
+                        color = 'green';
+                        break;
+                    case 'Overweight':
+                        color = 'orange';
+                        break;
+                    case 'Obese':
+                        color = 'red';
+                        break;
+                }
+
+                resultDiv.innerHTML = `Your BMI is ${data.bmi} - ${data.category}`;
+                resultDiv.style.color = color;
+            } else {
+                const err = await response.json();
+                resultDiv.innerHTML = err.message;
+                resultDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>

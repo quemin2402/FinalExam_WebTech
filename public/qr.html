@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 style="color:white; text-align: center;">My App</h2>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/bmi"><i class="fas fa-weight-scale"></i> BMI Calculator</a>
+            <a href="/email"><i class="fas fa-envelope"></i> Email Sender</a>
+            <a href="/qr"><i class="fas fa-qrcode"></i> QR Code Generator</a>
+            <a href="/weather"><i class="fas fa-cloud-sun"></i> Weather Info</a>
+            <a href="/crud"><i class="fas fa-pen-to-square"></i> Manage Blog</a>
+        </div>
+        <div>
+            <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 style="text-align: center;">QR Code Generator</h1>
+        <form id="qrForm">
+            <label>Enter URL:</label>
+            <input type="text" id="url" required>
+            <br>
+            <button type="submit">Generate QR Code</button>
+        </form>
+
+        <div id="qrCodeContainer" style="margin-top: 20px; text-align: center;"></div>
+    </div>
+
+    <script>
+        document.getElementById('qrForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const url = document.getElementById('url').value;
+            
+            const response = await fetch('/generate-qr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+
+            if(response.ok){
+                const blob = await response.blob();
+                const qrUrl = URL.createObjectURL(blob);
+
+                document.getElementById('qrCodeContainer').innerHTML = `
+                    <img src="${qrUrl}" alt="QR Code">
+                `;
+            } else {
+                alert('Failed to generate QR code.');
+            }
+        });
+    </script>
+</body>
+</html>

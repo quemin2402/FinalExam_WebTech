@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 style="color:white; text-align: center;">My App</h2>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/bmi"><i class="fas fa-weight-scale"></i> BMI Calculator</a>
+            <a href="/email"><i class="fas fa-envelope"></i> Email Sender</a>
+            <a href="/qr"><i class="fas fa-qrcode"></i> QR Code Generator</a>
+            <a href="/weather"><i class="fas fa-cloud-sun"></i> Weather Info</a>
+            <a href="/crud"><i class="fas fa-pen-to-square"></i> Manage Blog</a>
+        </div>
+        <div>
+            <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1>Welcome, <span id="username">User</span>!</h1>
+        <p>This is your personal dashboard where you can manage different tools and features.</p>
+
+        <div class="card-container">
+            <div class="card">
+                <img src="images/bmi.png" style="width: 60px;" alt="BMI">
+                <h3>BMI Calculator</h3>
+                <p>Calculate your Body Mass Index easily.</p>
+                <a href="/bmi"><button>Go</button></a>
+            </div>
+
+            <div class="card">
+                <img src="images/email.png" style="width: 60px;" alt="Email">
+                <h3>Email Sender</h3>
+                <p>Send emails with attachments quickly.</p>
+                <a href="/email"><button>Go</button></a>
+            </div>
+
+            <div class="card">
+                <img src="images/qr-code.png" style="width: 60px;" alt="QR">
+                <h3>QR Code Generator</h3>
+                <p>Create a qr code from any link.</p>
+                <a href="/qr"><button>Go</button></a>
+            </div>
+
+            <div class="card">
+                <img src="images/weather.png" style="width: 60px;" alt="Weather">
+                <h3>Weather Info</h3>
+                <p>Get real-time weather updates.</p>
+                <a href="/weather"><button>Go</button></a>
+            </div>
+
+            <div class="card">
+                <img src="images/blog.png" style="width: 60px;" alt="Blog">
+                <h3>Manage Blogs</h3>
+                <p>Create your own blog and make CRUD operations.</p>
+                <a href="/crud"><button>Go</button></a>
+            </div>
+        </div>
+
+    <script>
+        async function checkAuth() {
+            try {
+                console.log("Checking authentication...");
+    
+                const response = await fetch('/api/dashboard', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+    
+                console.log("Raw response:", response);
+    
+                if (!response.ok) {
+                    console.error("Unauthorized access, redirecting to login.");
+                    window.location.href = '/login';
+                    return;
+                }
+    
+                const data = await response.json();
+                console.log("Dashboard data:", data);
+            } catch (error) {
+                console.error("Error checking auth:", error);
+            }
+        }
+    
+        document.addEventListener("DOMContentLoaded", checkAuth);
+    </script>
+</body>
+</html>

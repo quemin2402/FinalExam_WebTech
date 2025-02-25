@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Blog</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 style="color:white; text-align: center;">My App</h2>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/bmi"><i class="fas fa-weight-scale"></i> BMI Calculator</a>
+            <a href="/email"><i class="fas fa-envelope"></i> Email Sender</a>
+            <a href="/qr"><i class="fas fa-qrcode"></i> QR Code Generator</a>
+            <a href="/weather"><i class="fas fa-cloud-sun"></i> Weather Info</a>
+            <a href="/crud"><i class="fas fa-pen-to-square"></i> Manage Blog</a>
+        </div>
+        <div>
+            <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 style="text-align: center;">CRUD Blog Management</h1>
+        <form id="blog-form">
+            <label>Title:</label>
+            <input type="text" id="title" required>
+            
+            <label>Body:</label>
+            <textarea id="body" required></textarea>
+            
+            <label>Author:</label>
+            <input type="text" id="author">
+
+            <button type="submit">Create Post</button>
+        </form>
+
+        <h2 style="padding-left: 110px;">All Posts</h2>
+        <div id="blog-list"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("blog-form");
+            const blogList = document.getElementById("blog-list");
+
+            async function fetchBlogs() {
+                try {
+                    const response = await fetch('/api/blogs');
+                    if (!response.ok) throw new Error('Failed to fetch blogs');
+                    const blogs = await response.json();
+
+                    blogList.innerHTML = blogs.map(blog => `
+                        <div class="blog-item-container">
+                            <div class="blog-item" id="post-${blog._id}">
+                                <h3>${blog.title}</h3>
+                                <p>${blog.body}</p>
+                                <span>Author: ${blog.author.replace(/^Author:\s*/, '')}</span>
+                                <div class="blog-actions">
+                                    <button class="edit-btn" onclick="editBlog('${blog._id}')">Edit</button>
+                                    <button class="delete-btn" onclick="deleteBlog('${blog._id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error(error);
+                    blogList.innerHTML = "<p>Error loading blogs. Try again later.</p>";
+                }
+            }
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const title = document.getElementById("title").value;
+                const body = document.getElementById("body").value;
+                const author = document.getElementById("author").value;
+
+                await fetch("/api/blogs", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, body, author })
+                });
+
+                form.reset();
+                fetchBlogs();
+            });
+
+            window.deleteBlog = async (id) => {
+                if (!confirm("Are you sure you want to delete this post?")) return;
+                await fetch(`/api/blogs/${id}`, { method: "DELETE" });
+                fetchBlogs();
+            };
+
+            window.editBlog = async (id) => {
+                const postContainer = document.getElementById(`post-${id}`);
+                const titleElement = postContainer.querySelector("h3");
+                const bodyElement = postContainer.querySelector("p");
+                const authorElement = postContainer.querySelector("span");
+
+                const currentTitle = titleElement.innerText;
+                const currentBody = bodyElement.innerText;
+                const currentAuthor = authorElement.innerText.replace("Author: ", "");
+
+                postContainer.innerHTML = `
+                    <div class="edit-container">
+                        <input type="text" id="edit-title-${id}" value="${currentTitle}" class="edit-input">
+                        <textarea id="edit-body-${id}" class="edit-textarea">${currentBody}</textarea>
+                        <input type="text" id="edit-author-${id}" value="${currentAuthor}" class="edit-input">
+                        <div class="edit-buttons">
+                            <button class="save-btn" onclick="saveEdit('${id}')">Save</button>
+                            <button class="cancel-btn" onclick="cancelEdit('${id}', '${currentTitle}', '${currentBody}', '${currentAuthor}')">Cancel</button>
+                        </div>
+                    </div>
+                `;
+            };
+
+            window.saveEdit = async (id) => {
+                const newTitle = document.getElementById(`edit-title-${id}`).value;
+                const newBody = document.getElementById(`edit-body-${id}`).value;
+                const newAuthor = document.getElementById(`edit-author-${id}`).value;
+
+                const authorValue = newAuthor && newAuthor.trim() ? newAuthor : "Anonymous";
+
+                await fetch(`/api/blogs/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title: newTitle, body: newBody, author: authorValue })
+                });
+
+                fetchBlogs();
+            };
+
+            window.cancelEdit = (id, title, body, author = "Anonymous") => {
+                const postContainer = document.getElementById(`post-${id}`);
+                postContainer.innerHTML = `
+                    <div class="blog-content">
+                        <h3>${title}</h3>
+                        <p>${body}</p>
+                        <span>Author: ${author}</span>
+                    </div>
+                    <div class="blog-actions">
+                        <button class="edit-btn" onclick="editBlog('${id}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteBlog('${id}')">Delete</button>
+                    </div>
+                `;
+            };
+
+            fetchBlogs();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Info</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div>
+            <h2 style="color:white; text-align: center;">My App</h2>
+            <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/bmi"><i class="fas fa-weight-scale"></i> BMI Calculator</a>
+            <a href="/email"><i class="fas fa-envelope"></i> Email Sender</a>
+            <a href="/qr"><i class="fas fa-qrcode"></i> QR Code Generator</a>
+            <a href="/weather"><i class="fas fa-cloud-sun"></i> Weather Info</a>
+            <a href="/crud"><i class="fas fa-pen-to-square"></i> Manage Blog</a>
+        </div>
+        <div>
+            <a href="/login"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1 style="text-align: center;">Weather Information</h1>
+        <form id="weather-form">
+            <input type="text" id="city" placeholder="Enter city" required>
+            <button type="submit">Get Weather</button>
+        </form>
+
+        <div class="weather-container" id="weather-result" style="display:none;">
+            <div class="weather-info">
+                <h2 id="city-name"></h2>
+                <img id="weather-icon" alt="icon">
+                <p id="description"></p>
+                <p><strong>Temperature:</strong> <span id="temperature"></span></p>
+                <p><strong>Feels Like:</strong> <span id="feels-like"></span></p>
+                <p><strong>Humidity:</strong> <span id="humidity"></span></p>
+                <p><strong>Pressure:</strong> <span id="pressure"></span></p>
+                <p><strong>Wind Speed:</strong> <span id="wind-speed"></span></p>
+                <p><strong>Rain:</strong> <span id="rain"></span></p>
+                <p><strong>Country:</strong> <span id="country"></span> <img id="country-flag" style="width: 30px; height: 20px; margin-left: 10px;"></p>
+            </div>
+            
+            <div class="map-container">
+                <iframe id="map" style="display: none;"></iframe>
+            </div>
+        </div>        
+
+        <div id="extra-info" style="display:none; padding-left: 115px;">
+            <h3>Air Quality</h3>
+            <p id="air-quality"></p>
+            
+            <h3>Latest News</h3>
+            <div id="news"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('weather-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const city = document.getElementById('city').value.trim();
+
+        if (!city) {
+            alert('Please enter a city.');
+            return;
+        }
+
+        try {
+            const weatherRes = await fetch(`/api/weather?city=${city}`);
+            const weather = await weatherRes.json();
+
+            document.getElementById('city-name').innerText = city;
+            document.getElementById('description').innerText = weather.description;
+            document.getElementById('temperature').innerText = weather.temperature + '°C';
+            document.getElementById('feels-like').innerText = weather.feels_like + '°C';
+            document.getElementById('humidity').innerText = weather.humidity + '%';
+            document.getElementById('pressure').innerText = weather.pressure + ' hPa';
+            document.getElementById('wind-speed').innerText = weather.wind_speed + ' m/s';
+            document.getElementById('rain').innerText = weather.rain ? weather.rain + ' mm' : 'No rain';
+            document.getElementById('country').innerText = weather.country;
+            document.getElementById('weather-icon').src = weather.icon;
+
+            const countryCode = weather.country ? weather.country.toLowerCase() : null;
+            if (countryCode) {
+                document.getElementById('country-flag').src = `https://flagcdn.com/w40/${countryCode}.png`;
+                document.getElementById('country-flag').alt = weather.country; // Альтернативный текст
+            } else {
+                console.error("Country code is missing in the API response");
+            }
+
+            console.log(weather);
+
+            const { lat, lon } = weather.coordinates;
+            document.getElementById('map').src = 
+            `https://maps.google.com/maps?q=${lat},${lon}&z=10&output=embed`;
+
+            document.getElementById('map').style.display = 'block';
+
+            document.getElementById('weather-result').style.display = 'flex';
+
+            const newsRes = await fetch(`/api/news?city=${city}`);
+            const news = await newsRes.json();
+            const newsContainer = document.getElementById('news');
+
+            newsContainer.innerHTML = `
+                <div class="news-container">
+                    ${news.map(article => `
+                        <div class="news-card">
+                            <h4><a href="${article.url}" target="_blank">${article.title}</a></h4>
+                            <p>${article.description || 'No description available.'}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            const airRes = await fetch(`/api/air-quality?city=${city}`);
+            const airQuality = await airRes.json();
+            document.getElementById('air-quality').innerText = `
+                AQI: ${airQuality.overall_aqi}, 
+                CO: ${airQuality.CO.concentration} µg/m³
+            `;
+
+            document.getElementById('extra-info').style.display = 'block';
+
+        } catch (error) {
+            alert('Error fetching data.');
+            console.error(error);
+        }
+        });
+    </script>
+</body>
+</html>
