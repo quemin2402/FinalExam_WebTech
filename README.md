@@ -3,6 +3,8 @@
 ## Description
 This project is a web application that includes features such as blog management, BMI calculator, QR code generation, email sending, and weather information retrieval. It supports user authentication and protected routes.
 
+<img width="1407" alt="Снимок экрана 2025-02-26 в 00 03 45" src="https://github.com/user-attachments/assets/61b2e943-e870-4191-ba03-a7a9daf71208" />
+
 ## Features
 - **User Authentication** (JWT + Cookies)
 - **Blog Management (CRUD)** (Create, Read, Update, Delete blog posts)
@@ -77,5 +79,5 @@ FINAL_EXAM_WEBTECH/
 
 ## Student info
 
-Author: [Merey Ibraim]
-Group: [SE-2308]
+* Author: Merey Ibraim
+* Group: SE-2308
