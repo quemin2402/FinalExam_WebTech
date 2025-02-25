@@ -33,6 +33,9 @@ MONGO_URI=mongodb://127.0.0.1:27017/final_project
 JWT_SECRET=your_secret_key
 EMAIL_USER=your_email@example.com
 EMAIL_PASS=your_email_password
+NEWS_API_KEY=your_api
+AIR_QUALITY_API_KEY=your_api
+OPENWEATHER_API_KEY=your_api
 ```
 
 ### 4. Start the Server
